@@ -6,7 +6,7 @@
 
 (defn render-ui [state]
   [:div
-   [:h1.text-lg "Counter!"]
+   [:h1.text-lg "Counter"]
    [:div.flex.gap-4.items-center
     [:div "Number is " (:number state)]
     [:button.btn
