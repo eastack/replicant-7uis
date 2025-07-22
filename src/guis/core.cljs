@@ -34,6 +34,7 @@
   (mapcat
    (fn [action]
      (or (counter/perform-action state action)
+         (temperature/perform-action state action)
          (case (first action)
            :action/assoc-in
            [(into [:effect/assoc-in] (rest action))])))

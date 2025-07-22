@@ -14,4 +14,14 @@
     (is (= (temperature/celsius->fahrenheit 50) 122))
     (is (= (temperature/celsius->fahrenheit 100) 212))))
 
+(deftest set-temperature
+  (testing "Sets temperature and calculates Fahrenheit"
+    (is (= (temperature/set-temperature {:celsius 50})
+           [[:effect/assoc-in [:celsius] 50]
+            [:effect/assoc-in [:fahrenheit] 122]])))
+  (testing "Sets temperature and calculates Celsius"
+    (is (= (temperature/set-temperature {:fahrenheit 212})
+           [[:effect/assoc-in [:celsius] 100]
+            [:effect/assoc-in [:fahrenheit] 212]]))))
+
 (run-tests)
