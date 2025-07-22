@@ -2,6 +2,8 @@
 .lsp/
 .cpcache/
 .shadow-cljs/
+.nrepl-port
+.calva/
 node_modules/
 resources/public/js
 resources/public/styles.css
