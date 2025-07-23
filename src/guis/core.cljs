@@ -22,7 +22,7 @@
     [:div.m-8
      (layout/tab-bar currnt-view views)
      (case currnt-view
-       :counter 
+       :counter
        (counter/render-ui state)
 
        :temperatures
@@ -36,7 +36,9 @@
 (defn process-effect [store [effect & args]]
   (case effect
     :effect/assoc-in
-    (apply swap! store assoc-in args)))
+    (let [r (apply swap! store assoc-in args)]
+      (prn r)
+      r)))
 
 (defn perform-actions [state event-data]
   (mapcat
@@ -46,6 +48,7 @@
          (case (first action)
            :action/assoc-in
            [(into [:effect/assoc-in] (rest action))])))
+
    event-data))
 
 (defn interpolate [event data]

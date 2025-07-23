@@ -144,6 +144,25 @@
     (is (->> (flights/render-form {::flights/departure-date {:invalid? true}})
              (lookup/select-one "input[name=departure-date].input-error"))))
 
+  (testing "Takes user input on return date"
+    (is (= (->> (flights/render-form {})
+                (lookup/select-one "input[name=return-date]")
+                lookup/attrs
+                :on
+                :input)
+           [[:action/assoc-in [::flights/return-date] :event.target/value]])))
+
+  (testing "Marks invalid return date"
+    (is (->> (flights/render-form {::flights/return-date {:invalid? true}})
+             (lookup/select-one "input[name=return-date].input-error"))))
+
+  (testing "Clicking button books flight"
+    (is (->> (flights/render-form {})
+             (lookup/select-one "button")
+             lookup/attrs
+             :on :click)
+        [[:action/assoc-in [::flights/booked?] true]]))
+
 ;;
   )
 

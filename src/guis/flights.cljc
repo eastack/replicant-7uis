@@ -31,6 +31,7 @@
   (< (compare a b) 0))
 
 (defn get-form-state [state]
+  (prn "flight-type: " (name (or (::type state) :one-way)))
   (let [flight-type (or (::type state) :one-way)
         departure-date (prepare-departure-date state)
         return-date (prepare-return-date state flight-type departure-date)]
@@ -43,33 +44,59 @@
                                    (before? (:value return-date)
                                             (:value departure-date))))}}))
 
+(defn render-date-input [form-state k]
+  [:input.input
+   (cond-> {:type "text"
+            :name (name k)
+            :value (:value (k form-state))
+            :disabled (:disabled? (k form-state))
+            :on {:input
+                 [[:action/assoc-in [k] :event.target/value]]}}
+     (-> form-state k :invalid?)
+     (assoc :class :input-error)
+
+     (:disabled? (k form-state))
+     (assoc :disabled "disabled"))])
+
+(defn render-select-option [form-state option-name  k]
+  [:option
+   (cond-> {:value (name k)}
+     (= (::type form-state) k)
+     (assoc :selected true))
+   option-name])
+
 (defn render-form [form-state]
   [:form.flex.flex-col.max-w-48.gap-4
-   [:label "Choose type!"]
    [:select.select
-    {:on
+    {:name "flight-type"
+     :on
      {:input
       [[:action/assoc-in [::type] :event.target/value-as-keyword]]}}
-    [:option {:value "one-way"} "One-way"]
-    [:option {:value "roundtrip"} "Roundtrip"]]
-   [:div.m-9]
-   [:input.input
-    (cond-> {:type "text"
-             :name "departure-date"
-             :value (:value (::departure-date form-state))
-             :disabled (:disabled? (::departure-date form-state))
-             :on {:input
-                  [[:action/assoc-in [::departure-date] :event.target/value]]}}
-      (-> form-state ::departure-date :invalid?)
-      (assoc :class :input-error))]
-   [:input.input {:type "text"
-                  :name "return-date"
-                  :value (:value (::return-date form-state))
-                  :disabled (:disabled? (::return-date form-state))}]
+    (render-select-option form-state "One-way" :one-way)
+    (render-select-option form-state "Roundtrip" :roundtrip)]
+   (render-date-input form-state ::departure-date)
+   (render-date-input form-state ::return-date)
    [:button.btn
-    {:disabled (:disabled? (::button form-state))}
+    {:disabled (:disabled? (::button form-state))
+     :on {:click [[:action/assoc-in [::booked?] true]]}}
     "Book"]])
+
+(defn render-receipt [form-state]
+  [:div
+   [:p.mb-4
+    "You have booked a "
+    (name (::type form-state))
+    " flight on "
+    (:value (::departure-date form-state))
+    (when (= :roundtrip (::type form-state))
+      (str ", returning on " (:value (::return-date form-state))))
+    "."]
+   [:button.btn
+    {:on {:click [[:action/assoc-in [::booked?] false]]}}
+    "Try again"]])
 
 (defn render-ui [state]
   [:div [:h1.text-lg.mb-4 "Flight booking"]
-   (render-form (get-form-state state))])
+   (if (::booked? state)
+     (render-receipt (get-form-state state))
+     (render-form (get-form-state state)))])
